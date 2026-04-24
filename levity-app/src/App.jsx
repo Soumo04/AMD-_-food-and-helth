@@ -55,14 +55,22 @@ const BiometricsChart = ({ data }) => {
   );
 };
 
-const AITerminal = ({ sequence }) => {
+const AITerminal = ({ sequence, onUserSubmit }) => {
   const scrollRef = useRef(null);
+  const [inputValue, setInputValue] = useState('');
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [sequence]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!inputValue.trim()) return;
+    onUserSubmit(inputValue);
+    setInputValue('');
+  };
 
   return (
     <div className="ai-terminal">
@@ -86,6 +94,16 @@ const AITerminal = ({ sequence }) => {
           ))}
         </AnimatePresence>
       </div>
+      <form className="terminal-input-container" onSubmit={handleSubmit}>
+        <span style={{ color: 'var(--accent-secondary)' }}>&gt;</span>
+        <input 
+          type="text" 
+          className="terminal-input" 
+          placeholder="Inject manual context (e.g., 'Feeling stressed')..." 
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+        />
+      </form>
     </div>
   );
 };
@@ -175,6 +193,7 @@ function App() {
 
   // Simulate AI Thinking
   useEffect(() => {
+    setTerminalLogs([]); // Prevent duplicate logs on hot-reload
     let i = 0;
     const interval = setInterval(() => {
       if (i < aiReasoningSequence.length) {
@@ -200,6 +219,26 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
+  const handleUserSubmit = (text) => {
+    const now = new Date();
+    const pad = (num) => String(num).padStart(2, '0');
+    const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    
+    // Add user message
+    setTerminalLogs(prev => [...prev, { time: timeStr, type: 'process', text: `[USER INJECT] ${text}` }]);
+    
+    // Simulate AI response after 1.5 seconds
+    setTimeout(() => {
+      const responseTime = new Date();
+      const respTimeStr = `${pad(responseTime.getHours())}:${pad(responseTime.getMinutes())}:${pad(responseTime.getSeconds())}`;
+      setTerminalLogs(prev => [...prev, { 
+        time: respTimeStr, 
+        type: 'decision', 
+        text: `Context override accepted: "${text}". Re-calibrating next intervention...` 
+      }]);
+    }, 1500);
+  };
+
   return (
     <div className="app-container">
       <header className="header">
@@ -217,7 +256,7 @@ function App() {
         
         {/* Left: AI Terminal */}
         <aside>
-          <AITerminal sequence={terminalLogs} />
+          <AITerminal sequence={terminalLogs} onUserSubmit={handleUserSubmit} />
         </aside>
 
         {/* Center: Nudge Feed */}
@@ -242,9 +281,9 @@ function App() {
             type="ai"
             title="Autopilot Inventory Logistics"
             time="Tomorrow 9:00 AM Delivery"
-            body="Your weekly staples are low. I've built your Instacart cart and optimized for delivery fees based on your consumption rates."
-            actionText="Approve $64.20 Order"
-            onExecute={() => setTerminalLogs(prev => [...prev, { time: '14:20:01', type: 'execute', text: 'Firebase Function -> Instacart API: Order 9482A Confirmed.' }])}
+            body="Your weekly staples are low. I've built your quick-commerce cart and optimized for delivery fees based on your consumption rates."
+            actionText="Approve ₹1,850 Order"
+            onExecute={() => setTerminalLogs(prev => [...prev, { time: '14:20:01', type: 'execute', text: 'Firebase Function -> Quick-Commerce API: Order 9482A Confirmed.' }])}
           />
         </main>
 

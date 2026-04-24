@@ -279,7 +279,31 @@ h1, h2, h3, h4, h5, h6 {
 
 .log-time {
   color: #555;
-  min-width: 60px;
+  min-width: 85px;
+  flex-shrink: 0;
+}
+
+.terminal-input-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 1rem;
+  border-top: 1px solid #222;
+  margin-top: 1rem;
+}
+
+.terminal-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.terminal-input::placeholder {
+  color: #555;
 }
 
 /* Nudge Cards */
